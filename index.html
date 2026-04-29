@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Braille Instructor</title>
+
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+<div class="container">
+
+<!-- HOME -->
+<div id="home" class="page active">
+  <h1>Braille Instructor</h1>
+
+  <button class="secondary" onclick="connectArduino()">Connect</button>
+  <button class="secondary" onclick="disconnectArduino()">Disconnect</button>
+
+  <div class="card">
+    <button class="primary" onclick="go('manual')">Manual</button>
+    <button class="secondary" onclick="go('lessons')">Lessons</button>
+    <button class="secondary" onclick="go('aispell')">Ask AI</button>
+  </div>
+</div>
+
+<!-- MANUAL -->
+<div id="manual" class="page">
+  <div class="header">
+    <h2>Manual Pad</h2>
+    <button onclick="go('home')">Back</button>
+  </div>
+
+  <div class="card">
+    <div id="dots" class="grid"></div>
+    <button onclick="resetDots()">Reset</button>
+    <button class="primary" onclick="sendToArduino()">Sync</button>
+  </div>
+</div>
+
+<!-- LESSONS -->
+<div id="lessons" class="page">
+  <div class="header">
+    <h2>Lessons</h2>
+    <button onclick="go('home')">Back</button>
+  </div>
+
+  <div class="card">
+    <button onclick="go('digits')">Digits</button>
+    <button onclick="go('alphabets')">Alphabets</button>
+  </div>
+</div>
+
+<!-- DIGITS -->
+<div id="digits" class="page">
+  <div class="header">
+    <h2>Digits</h2>
+    <button onclick="go('lessons')">Back</button>
+  </div>
+  <div id="digitList" class="card list"></div>
+</div>
+
+<!-- ALPHABETS -->
+<div id="alphabets" class="page">
+  <div class="header">
+    <h2>Alphabets</h2>
+    <button onclick="go('lessons')">Back</button>
+  </div>
+  <div id="alphaList" class="card list"></div>
+</div>
+
+<!-- AI SPELL -->
+<div id="aispell" class="page">
+  <div class="header">
+    <h2>Ask AI</h2>
+    <button onclick="go('home')">Back</button>
+  </div>
+
+  <!-- SIDE BY SIDE -->
+  <div class="ai-row">
+
+    <!-- LEFT SIDE -->
+    <div class="card ai-left">
+      <p style="color:#94a3b8;font-size:13px;margin:0 0 12px;">
+        Type or speak a word — or ask a question. AI will find the answer and spell it out in Braille.
+      </p>
+
+      <input
+        id="aiWordInput"
+        type="text"
+        placeholder='e.g. "apple" or "when did India get freedom?"'
+        style="width:100%;padding:12px;border-radius:12px;border:none;background:#334155;color:white;font-size:15px;box-sizing:border-box;outline:none;"
+      />
+
+      <button class="primary" id="aiBtn" onclick="handleAISpell()" style="margin-top:10px;">Send</button>
+      <button class="secondary" id="voiceBtn" onclick="startVoice()" style="margin-top:6px;">🎤 Speak</button>
+      <button class="secondary" id="aiStopBtn" onclick="stopAISpell()" style="margin-top:6px;display:none;">Stop</button>
+
+      <div id="transcriptBox" style="display:none;margin-top:12px;padding:10px 14px;background:#0f172a;border-radius:12px;border:1px solid #334155;">
+        <p style="font-size:11px;color:#64748b;margin:0 0 3px;">YOU SAID</p>
+        <p id="transcriptText" style="font-size:14px;color:#e2e8f0;margin:0;"></p>
+      </div>
+
+      <div id="aiReplyBox" style="display:none;margin-top:8px;padding:10px 14px;background:#0f172a;border-radius:12px;border:1px solid #334155;">
+        <p style="font-size:11px;color:#64748b;margin:0 0 3px;">AI ANSWER</p>
+        <p id="aiReplyText" style="font-size:14px;color:#a5b4fc;margin:0 0 8px;"></p>
+        <p style="font-size:11px;color:#64748b;margin:0 0 3px;">SPELLING OUT</p>
+        <p id="aiSpellingOut" style="font-size:15px;color:#e2e8f0;margin:0;font-weight:600;"></p>
+      </div>
+
+      <p id="aiStatus" style="color:#94a3b8;font-size:13px;margin-top:12px;"></p>
+      <div id="aiLetterQueue" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;"></div>
+
+      <div style="height:4px;background:#334155;border-radius:2px;margin-top:10px;">
+        <div id="aiProgress" style="height:100%;background:#6366f1;width:0%;"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="card ai-right">
+      <p style="color:#94a3b8;font-size:13px;margin:0 0 8px;">Live dot preview</p>
+      <div id="aiDots" class="grid"></div>
+      <p id="aiCurrentLetter" style="text-align:center;font-size:28px;font-weight:600;margin-top:10px;"></p>
+    </div>
+
+  </div>
+</div>
+
+</div>
+<script src="app.js"></script>
+</body>
+</html>
