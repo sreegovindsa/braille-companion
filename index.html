@@ -23,6 +23,7 @@
     <button class="primary" onclick="go('manual')">Manual</button>
     <button class="secondary" onclick="go('lessons')">Lessons</button>
     <button class="secondary" onclick="go('aispell')">Ask AI</button>
+    <button class="secondary" onclick="go('brailleChart')">Braille Character Chart</button>
   </div>
 </div>
 
@@ -59,8 +60,16 @@
     <h2>Digits</h2>
     <button onclick="go('lessons')">Back</button>
   </div>
+  <div class="ai-row">
   <div id="digitList" class="card list"></div>
+    <div class="card ai-right">
+      <p style="color:#94a3b8;font-size:13px;margin:0 0 8px;">Digit Braille Preview</p>
+      <div id="digitDots" class="grid"></div>
+      <p id="digitCurrent" style="text-align:center;font-size:28px;font-weight:600;margin-top:10px;"></p>
+    </div>
+  </div>
 </div>
+
 
 <!-- ALPHABETS -->
 <div id="alphabets" class="page">
@@ -68,7 +77,15 @@
     <h2>Alphabets</h2>
     <button onclick="go('lessons')">Back</button>
   </div>
+
+  <div class="ai-row">
   <div id="alphaList" class="card list"></div>
+    <div class="card ai-right">
+      <p style="color:#94a3b8;font-size:13px;margin:0 0 8px;">Alphabet Braille Preview</p>
+      <div id="alphaDots" class="grid"></div>
+      <p id="alphaCurrent" style="text-align:center;font-size:28px;font-weight:600;margin-top:10px;"></p>
+    </div>
+  </div>
 </div>
 
 <!-- AI SPELL -->
@@ -127,6 +144,25 @@
 
   </div>
 </div>
+
+
+
+
+<!-- BRAILLE CHARACTER CHART -->
+<div id="brailleChart" class="page">
+  <div class="header">
+    <h2>Braille Character Chart</h2>
+    <button onclick="go('home')">Back</button>
+  </div>
+  <div class="card">
+    <img
+      src="Braille_characters.jpg"
+      alt="Braille Character Chart A-Z and 0-9"
+      style="width:100%;max-width:1000px;border-radius:15px;display:block;margin:auto;"
+    >
+  </div>
+</div>
+
 
 </div>
 <script src="app.js"></script>
