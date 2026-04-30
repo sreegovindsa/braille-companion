@@ -1,21 +1,21 @@
 document.addEventListener("DOMContentLoaded", () => {
 
 
-const GEMINI_API_KEY = "YOUR_KEY_HERE";
-
+const AI_SERVER = "http://YOUR__LOCAL_SERVER_IP_ADDRESS:5000";
 
 window.go = function(page){
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(page).classList.add('active');
 };
 
-let port, writer;
+let port, writer, reader;;
 
 window.connectArduino = async function(){
   try{
     port = await navigator.serial.requestPort();
     await port.open({ baudRate: 9600 });
     writer = port.writable.getWriter();
+    readFromArduino();
     alert("Connected");
   }catch(e){
     console.error(e);
@@ -23,8 +23,39 @@ window.connectArduino = async function(){
   }
 };
 
+async function readFromArduino(){
+  const decoder = new TextDecoderStream();
+  port.readable.pipeTo(decoder.writable);
+  reader = decoder.readable.getReader();
+  let buffer = "";
+  try{
+    while(true){
+      const { value, done } = await reader.read();
+      if(done) break;
+      buffer += value;
+      if(buffer.includes("\n")){
+        const lines = buffer.split("\n");
+        buffer = lines.pop();
+        for(let line of lines){
+          line = line.trim();
+          if(line === "AI_MODE"){
+            go("aispell");
+            setTimeout(() => {
+              startVoice();
+            }, 500);
+          }
+        }
+      }
+    }
+  }catch(e){
+    console.error("Arduino read error:", e);
+  }
+}
+
+
 window.disconnectArduino = async function(){
   try{
+    if(reader){ await reader.cancel(); reader = null; }
     if(writer){ await writer.releaseLock(); writer = null; }
     if(port)  { await port.close();         port   = null; }
     alert("Disconnected");
@@ -92,13 +123,34 @@ const braille = {
   "5":"100010", "6":"110100", "7":"110110", "8":"110010", "9":"010100"
 };
 
+function createPreviewDots(containerId){
+  const container = document.getElementById(containerId);
+  for(let i = 0; i < 6; i++){
+    let d = document.createElement('div');
+    d.className = 'dot';
+    container.appendChild(d);
+  }
+}
+function setPreviewDots(containerId, bits){
+  document.querySelectorAll(`#${containerId} .dot`).forEach((d, i) => {
+    d.classList.toggle('active', bits[i] === '1');
+  });
+}
+createPreviewDots('alphaDots');
+createPreviewDots('digitDots');
 
 const alphaDiv = document.getElementById('alphaList');
 Object.keys(braille).filter(k => isNaN(k)).forEach(k => {
   let btn = document.createElement('button');
   btn.className = 'small-btn';
   btn.innerText = k.toUpperCase();
-  btn.onclick      = () => { unlockSpeech(); speak(k); sendToArduino(braille[k]); };
+  btn.onclick = () => {
+  unlockSpeech();
+  speak(k);
+  setPreviewDots('alphaDots', braille[k]);
+  document.getElementById('alphaCurrent').textContent = k.toUpperCase();
+  sendToArduino(braille[k]);
+};
   btn.onmouseenter = () => speak(k);
   alphaDiv.appendChild(btn);
 });
@@ -109,7 +161,13 @@ Object.keys(braille).filter(k => !isNaN(k)).forEach(k => {
   let btn = document.createElement('button');
   btn.className = 'small-btn';
   btn.innerText = k;
-  btn.onclick      = () => { unlockSpeech(); speak(k); sendToArduino(braille[k]); };
+  btn.onclick = () => {
+  unlockSpeech();
+  speak(k);
+  setPreviewDots('digitDots', braille[k]);
+  document.getElementById('digitCurrent').textContent = k;
+  sendToArduino(braille[k]);
+}
   btn.onmouseenter = () => speak(k);
   digitDiv.appendChild(btn);
 });
@@ -235,7 +293,7 @@ async function processInput(input){
     || input.trim().split(/\s+/).length > 3;
 
   if(isQuestion){
-    await askGeminiAndSpell(input);
+    await askLocalAIAndSpell(input);
   } else {
     hideAIBoxes();
     await spellOut(input);
@@ -243,51 +301,38 @@ async function processInput(input){
 }
 
 
-async function askGeminiAndSpell(question){
+async function askLocalAIAndSpell(question){
   const status      = document.getElementById('aiStatus');
   const replyBox    = document.getElementById('aiReplyBox');
   const replyText   = document.getElementById('aiReplyText');
   const spellingOut = document.getElementById('aiSpellingOut');
 
   hideAIBoxes();
-  status.textContent = "Asking AI…";
+  status.textContent = "Asking local AI…";
 
-  const systemPrompt = `You are a Braille instructor assistant.
-The user (often a blind learner) asks a question or says a word.
-Your job: respond with the SHORTEST possible answer to be spelled out in Braille on a physical device.
 
-Rules:
-- If the user says a single word like "apple", return exactly that word.
-- If the user asks a factual question (e.g. "when did India get freedom"), return ONLY the key answer token — a number, a name, or a short word. E.g. "1947", "Gandhi", "Delhi".
-- Never return a full sentence.
-- Never add punctuation, articles, or explanations.
-- Return ONLY the answer token, nothing else.`;
 
   try{
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
-      {
+    const res = await fetch(`${AI_SERVER}/ask`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": GEMINI_API_KEY
-        },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: [{ role: "user", parts: [{ text: question }] }]
-        })
+          "Content-Type": "application/json"},
+          
+        
+        body: JSON.stringify({ question: question })
       }
     );
 
-    if(!res.ok){
-      const err = await res.json();
-      throw new Error(err.error?.message || "API error " + res.status);
-    }
+    if(!res.ok) throw new Error("Server error " + res.status);
 
     const data   = await res.json();
-    const answer = data.candidates[0].content.parts[0].text.trim();
+    const answer = (data.answer || "").trim();
 
+    if(!answer || answer.startsWith("ERROR:")){
     if(!answer){ status.textContent = "AI returned an empty answer."; return; }
+      status.textContent = answer || "AI returned empty answer. Is llama-server running?";
+      return;
+    }
 
     replyBox.style.display  = 'block';
     replyText.textContent   = answer;
@@ -300,7 +345,13 @@ Rules:
 
   }catch(e){
     console.error(e);
+    console.error(e);
+    if(e.message.includes("Failed to fetch")){
+      status.textContent = "Cannot reach AI server. Is start.sh running? Check: http://localhost:5000";
+    } else {
     status.textContent = "AI request failed: " + e.message;
+      status.textContent = "AI error: " + e.message;
+    }
   }
 }
 
