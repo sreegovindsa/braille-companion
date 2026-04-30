@@ -146,4 +146,4 @@ Working system with:
 
 ## License
 
-For personal and educational use.
+MIT License © 2026 SREE GOVIND S A
