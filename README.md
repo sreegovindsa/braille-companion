@@ -1,46 +1,67 @@
 # AI-Powered Braille Companion
 
-An assistive system that converts text, speech, and AI responses into physical Braille output using an Arduino-based device and a local AI backend.
+An assistive system that converts text, speech, and AI responses into physical Braille output using an Arduino-based device and a fully local AI backend.
 
 ---
 
-## Features
+## Overview
 
-* Manual Braille input and output
-* Alphabet and digit learning interface
-* AI-powered question answering
-* Voice input support
-* Physical Braille output via Arduino
-* Fully offline AI using local model
+This system enables users to:
 
----
+* Input text manually or via voice
+* Ask factual questions
+* Receive concise AI-generated answers
+* Convert outputs into Braille
+* Render Braille physically using a servo-driven device
 
-## System Architecture
-
-* **Frontend**: HTML, CSS, JavaScript
-* **Hardware**: Arduino (servo-based Braille output)
-* **Backend**: Python (Flask server)
-* **AI Engine**: llama.cpp running Phi-2 model
+The entire AI pipeline runs locally, without relying on external APIs.
 
 ---
 
-## How It Works
+## Key Capability
 
-1. User inputs text or speaks
-2. App determines:
+The system performs real-time transformation:
 
-   * direct spelling OR
-   * AI query
-3. Python server processes request
-4. Local AI model generates short response
-5. Output is converted to Braille
-6. Arduino renders physical dots
+```text id="9k2w1q"
+input → AI reasoning (if needed) → Braille encoding → physical output
+```
+
+---
+
+## Example
+
+**Input**
+
+```
+when did india get independence
+```
+
+**AI Output**
+
+```
+1947
+```
+
+**Result**
+
+* Spoken output
+* Visual preview
+* Physical Braille actuation
+
+---
+
+## Architecture
+
+* **Frontend** — HTML, CSS, JavaScript
+* **Hardware** — Arduino (servo-based Braille output)
+* **Backend** — Python (Flask server)
+* **AI Engine** — llama.cpp running Phi-2
 
 ---
 
 ## Project Structure
 
-```text id="r6q9vd"
+```text id="3m0jhd"
 .
 ├── index.html
 ├── style.css
@@ -59,26 +80,56 @@ An assistive system that converts text, speech, and AI responses into physical B
 
 ---
 
-## Setup
+## Design Decisions
 
-Follow the documentation in the `docs/` folder:
+* **Local AI over APIs**
+  Eliminates dependency on external services and improves privacy
 
-1. Termux setup
-2. llama.cpp installation
-3. Model download
-4. Python server setup
-5. Running the system
+* **Minimal AI responses**
+  Ensures efficient Braille rendering
+
+* **Hardware integration**
+  Provides tangible output instead of screen-only feedback
 
 ---
 
-## Notes
+## Performance
 
-* Model files are not included due to size
-* Runs entirely offline after setup
-* Requires ~4GB RAM for full system
+* AI response latency: ~5–15 seconds
+* Memory usage: ~4 GB total system
+* Runs on standard Android devices with sufficient RAM
+
+---
+
+## Limitations
+
+* Requires initial setup via Termux
+* Model file (~1.6 GB) not included
+* Performance depends on device capability
+
+---
+
+## Setup
+
+Detailed setup instructions are available in:
+
+```text id="6rfw7m"
+/docs/
+```
+
+---
+
+## Status
+
+Working system with:
+
+* local AI inference
+* voice + manual input
+* hardware output
+* full offline capability
 
 ---
 
 ## License
 
-For academic and educational use.
+For personal and educational use.
