@@ -18,6 +18,13 @@ The entire AI pipeline runs locally, without relying on external APIs.
 
 ---
 
+## Visuals
+
+### User Interface
+
+![UI - Main Screen](assets/ui1.png)
+![UI - AI Interaction](assets/ui2.png)
+
 ## Key Capability
 
 The system performs real-time transformation:
