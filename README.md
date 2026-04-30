@@ -4,6 +4,13 @@ An assistive system that converts text, speech, and AI responses into physical B
 
 ---
 
+## Context
+
+Access to real-time Braille output is typically limited by expensive hardware and dependence on cloud-based services.
+
+This system provides a self-contained alternative that integrates local AI processing with a physical Braille interface, enabling direct conversion of user input into tactile output without external dependencies.
+
+
 ## Overview
 
 This system enables users to:
