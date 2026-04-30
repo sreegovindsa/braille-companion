@@ -5,6 +5,8 @@ Servo s1, s2, s3, s4, s5, s6;
 const int UP_ANGLE = 70;
 const int DOWN_ANGLE = 0;
 
+const int AI_BUTTON_PIN = 3;   // AI button pin
+bool lastButtonState = HIGH;
 String inputString = "";
 bool stringComplete = false;
 
@@ -16,12 +18,21 @@ void setup() {
   s5.attach(4);
   s6.attach(2);
 
+  pinMode(AI_BUTTON_PIN, INPUT_PULLUP);
+
   Serial.begin(9600);
 
   resetAll();
 }
 
 void loop() {
+  // AI button checking
+  bool currentButtonState = digitalRead(AI_BUTTON_PIN);
+  if (lastButtonState == HIGH && currentButtonState == LOW) {
+    Serial.println("AI_MODE");
+    delay(300);   // debounce
+  }
+  lastButtonState = currentButtonState;
   if (stringComplete) {
     processInput(inputString);
     inputString = "";
